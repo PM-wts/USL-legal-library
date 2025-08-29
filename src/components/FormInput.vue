@@ -28,35 +28,6 @@
         <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
       </div>
 
-      <!-- Email -->
-      <div>
-        <label class="block text-gray-800 font-semibold mb-2">Email Address</label>
-        <input
-          v-model="form.email"
-          type="email"
-          placeholder="Enter your email address"
-          class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out"
-          @input="updateField('email', form.email)"
-        />
-        <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
-      </div>
-
-      <!-- Dropdown -->
-      <div>
-        <label class="block text-gray-800 font-semibold mb-2">Are you currently enrolled in one of our plans?</label>
-        <select
-          v-model="form.enrolled"
-          class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out"
-          @change="updateField('enrolled', form.enrolled)"
-        >
-          <option value="">Select an option</option>
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-          <option value="Unsure">Unsure</option>
-        </select>
-        <p v-if="errors.enrolled" class="text-red-500 text-sm mt-1">{{ errors.enrolled }}</p>
-      </div>
-
       <!-- Submit Button -->
       <div>
         <button
@@ -92,11 +63,16 @@ export default {
         errors.value = result.errors || {}
       } else {
         errors.value = {}
-        alert("Form submitted successfully ✅")
+
+        // ✅ Redirect user if href exists
+        if (result.data?.href) {
+          window.location.href = result.data.href
+        }
+
         console.log("Form Data:", form.value)
       }
     }
-
+    
     return {
       form,
       errors,
@@ -108,12 +84,12 @@ export default {
 </script>
 
 <style scoped>
-/* Input and select fields with focus animation */
-input, select {
+/* Input fields with focus animation */
+input {
   transition: border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
-input:focus, select:focus {
+input:focus {
   border-color: #6366f1; /* Indigo color */
   box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
 }

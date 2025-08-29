@@ -1,87 +1,110 @@
-import { createStore } from "vuex"
+import { createStore } from "vuex";
+import axios from "axios";
+import config from "../config";
+import { useToast } from "vue-toastification";
 
 export default createStore({
   state: {
     form: {
       username: "",
       password: "",
-      email: "",
-      enrolled: "",
     },
     response: null,
     loading: false,
     error: null,
   },
+
   mutations: {
     SET_FIELD(state, { field, value }) {
-      state.form[field] = value
+      state.form[field] = value;
     },
     SET_LOADING(state, payload) {
-      state.loading = payload
+      state.loading = payload;
     },
     SET_ERROR(state, payload) {
-      state.error = payload
+      state.error = payload;
     },
     SET_RESPONSE(state, payload) {
-      state.response = payload
+      state.response = payload;
     },
   },
+
   actions: {
+    // ✅ Client-side validation before API call
     validate({ state }) {
-      const errors = {}
+      const errors = {};
 
       if (!state.form.username) {
-        errors.username = "Username is required."
+        errors.username = "Username is required.";
       } else if (state.form.username.length < 3) {
-        errors.username = "Username must be at least 3 characters."
+        errors.username = "Username must be at least 3 characters.";
       }
 
       if (!state.form.password) {
-        errors.password = "Password is required."
+        errors.password = "Password is required.";
       } else if (state.form.password.length < 6) {
-        errors.password = "Password must be at least 6 characters."
+        errors.password = "Password must be at least 6 characters.";
       }
 
-      if (!state.form.email) {
-        errors.email = "Email is required."
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.form.email)) {
-        errors.email = "Please enter a valid email."
-      }
-
-      if (!state.form.enrolled) {
-        errors.enrolled = "Please select an option."
-      }
-
-      return errors
+      return errors;
     },
 
     async submitForm({ commit, dispatch, state }) {
-      commit("SET_LOADING", true)
-      commit("SET_ERROR", null)
-      commit("SET_RESPONSE", null)
+      const toast = useToast();
+      commit("SET_LOADING", true);
+      commit("SET_ERROR", null);
+      commit("SET_RESPONSE", null);
 
-      const errors = await dispatch("validate")
+      // 🔹 Local validation
+      const errors = await dispatch("validate");
       if (Object.keys(errors).length > 0) {
-        commit("SET_LOADING", false)
-        return { success: false, errors }
+        commit("SET_LOADING", false);
+
+        const combinedMsg = Object.values(errors).join("\n");
+        toast.error(combinedMsg, { timeout: 5000 });
+
+        return { success: false, errors };
       }
 
       try {
-        const res = await fetch("https://example.com/api/endpoint", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(state.form),
-        })
-        if (!res.ok) throw new Error("API error")
-        const data = await res.json()
-        commit("SET_RESPONSE", data)
-        return { success: true, data }
+        // 🔹 API call
+        const res = await axios.post(config.apiUrl, state.form);
+
+        if (res.data?.status === "Failed") {
+          if (res.data.errors) {
+            const combinedMsg = Object.values(res.data.errors).join("\n");
+            toast.error(combinedMsg, { timeout: 5000 });
+          } else {
+            toast.error(res.data.message || "Something went wrong", { timeout: 5000 });
+          }
+
+          commit("SET_ERROR", res.data.message);
+          return { success: false, error: res.data };
+        }
+
+        // 🔹 Success
+        console.log(res.data);
+
+        commit("SET_RESPONSE", res.data);
+        toast.success(res.data.message || "Login successful ✅", { timeout: 4000 });
+
+        if (res.data.href) {
+          setTimeout(() => {
+            window.location.href = res.data.href;
+          }, 1500);
+        }
+
+        return { success: true, data: res.data };
+
       } catch (err) {
-        commit("SET_ERROR", err.message)
-        return { success: false, error: err.message }
+        const errorMsg =
+          err.response?.data?.message || err.message || "Unexpected error";
+        commit("SET_ERROR", errorMsg);
+        toast.error(errorMsg, { timeout: 5000 });
+        return { success: false, error: errorMsg };
       } finally {
-        commit("SET_LOADING", false)
+        commit("SET_LOADING", false);
       }
     },
   },
-})
+});

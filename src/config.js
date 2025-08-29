@@ -5,15 +5,15 @@ const ENV = "development"; // "test" | "production"
 
 const config = {
   development: {
-    apiUrl: "https://abcd1234.execute-api.us-east-1.amazonaws.com/dev", // Lambda (dev stage)
+    apiUrl: "https://y2cqa979p5.execute-api.us-east-1.amazonaws.com/api/legallibrary/login", // Lambda (dev stage)
     debug: true,
   },
   test: {
-    apiUrl: "https://abcd1234.execute-api.us-east-1.amazonaws.com/test", // Lambda (test stage)
+    apiUrl: "https://y2cqa979p5.execute-api.us-east-1.amazonaws.com/api/legallibrary/login", // Lambda (test stage)
     debug: false,
   },
   production: {
-    apiUrl: "https://abcd1234.execute-api.us-east-1.amazonaws.com/prod", // Lambda (prod stage)
+    apiUrl: "https://y2cqa979p5.execute-api.us-east-1.amazonaws.com/api/legallibrary/login", // Lambda (prod stage)
     debug: false,
   },
 };

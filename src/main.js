@@ -2,15 +2,25 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router/index";
 import store from "./store/index";
-import config from "./config"; // 👈 import centralized config
+import config from "./config"; // centralized config
+
+// 👇 Import Toastification
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 const app = createApp(App);
 
-// ✅ Inject config globally so all components can use `$config`
+// ✅ Inject config globally
 app.config.globalProperties.$config = config;
 
-app.use(router).use(store).mount("#app");
+// ✅ Register toast plugin
+app.use(Toast, {
+  position: "top-right",
+  timeout: 3000,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  hideProgressBar: false,
+});
 
-// Debug log
-console.log("Running in:", config.env);
-console.log("API URL:", config.apiUrl);
+app.use(router).use(store).mount("#app");
