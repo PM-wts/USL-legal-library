@@ -8,8 +8,9 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/legal-doc/'), // 👈 match your deployment subfolder
   routes,
 });
+
 
 export default router;
