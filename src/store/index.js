@@ -7,7 +7,9 @@ export default createStore({
   state: {
     form: {
       username: "",
+      email: "",
       password: "",
+      state: "",
     },
     response: null,
     loading: false,
@@ -30,20 +32,33 @@ export default createStore({
   },
 
   actions: {
-    // ✅ Client-side validation before API call
     validate({ state }) {
       const errors = {};
 
+      // Username
       if (!state.form.username) {
         errors.username = "Username is required.";
       } else if (state.form.username.length < 3) {
         errors.username = "Username must be at least 3 characters.";
       }
 
+      // Email
+      if (!state.form.email) {
+        errors.email = "Email is required.";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.form.email)) {
+        errors.email = "Enter a valid email address.";
+      }
+
+      // Password
       if (!state.form.password) {
         errors.password = "Password is required.";
       } else if (state.form.password.length < 6) {
         errors.password = "Password must be at least 6 characters.";
+      }
+
+      // State
+      if (!state.form.state) {
+        errors.state = "Please select a state.";
       }
 
       return errors;
@@ -55,19 +70,15 @@ export default createStore({
       commit("SET_ERROR", null);
       commit("SET_RESPONSE", null);
 
-      // 🔹 Local validation
       const errors = await dispatch("validate");
       if (Object.keys(errors).length > 0) {
         commit("SET_LOADING", false);
-
         const combinedMsg = Object.values(errors).join("\n");
         toast.error(combinedMsg, { timeout: 5000 });
-
         return { success: false, errors };
       }
 
       try {
-        // 🔹 API call
         const res = await axios.post(config.apiUrl, state.form);
 
         if (res.data?.status === "Failed") {
@@ -82,11 +93,8 @@ export default createStore({
           return { success: false, error: res.data };
         }
 
-        // 🔹 Success
-        console.log(res.data);
-
         commit("SET_RESPONSE", res.data);
-        toast.success(res.data.message || "Login successful ✅", { timeout: 4000 });
+        toast.success(res.data.message || "Form submitted successfully ✅", { timeout: 4000 });
 
         if (res.data.href) {
           setTimeout(() => {
@@ -97,8 +105,7 @@ export default createStore({
         return { success: true, data: res.data };
 
       } catch (err) {
-        const errorMsg =
-          err.response?.data?.message || err.message || "Unexpected error";
+        const errorMsg = err.response?.data?.message || err.message || "Unexpected error";
         commit("SET_ERROR", errorMsg);
         toast.error(errorMsg, { timeout: 5000 });
         return { success: false, error: errorMsg };
