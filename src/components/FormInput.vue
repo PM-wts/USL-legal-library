@@ -15,6 +15,19 @@
         <p v-if="errors.username" class="text-red-500 text-sm mt-1">{{ errors.username }}</p>
       </div>
 
+      <!-- Password -->
+      <div>
+        <label class="block text-gray-800 font-semibold mb-2">Password</label>
+        <input
+          v-model="form.password"
+          type="password"
+          placeholder="Enter your password"
+          class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out"
+          @input="updateField('password', form.password)"
+        />
+        <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
+      </div>
+
       <!-- Email -->
       <div>
         <label class="block text-gray-800 font-semibold mb-2">Email</label>
@@ -28,18 +41,7 @@
         <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
       </div>
 
-      <!-- Password -->
-      <div>
-        <label class="block text-gray-800 font-semibold mb-2">Password</label>
-        <input
-          v-model="form.password"
-          type="password"
-          placeholder="Enter your password"
-          class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out"
-          @input="updateField('password', form.password)"
-        />
-        <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
-      </div>
+
 
       <!-- Select State -->
       <div>
