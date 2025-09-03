@@ -73,7 +73,6 @@
 <script>
 import { useStore } from "vuex"
 import { computed, ref } from "vue"
-// ✅ Use relative path import (no alias needed)
 import statesJson from "../assets/states.json"
 
 export default {
@@ -81,7 +80,7 @@ export default {
   setup() {
     const store = useStore()
     const errors = ref({})
-    const states = ref(statesJson) // direct JSON import
+    const states = ref(statesJson)
 
     const form = computed(() => store.state.form)
 
@@ -112,6 +111,7 @@ export default {
   },
 }
 </script>
+
 <style scoped>
 /* Input and select fields with focus animation */
 input,
@@ -122,7 +122,7 @@ select {
   border-radius: 0.5rem; /* rounded-md */
   font-size: 1rem;
   transition: border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  appearance: none; /* remove default browser arrow */
+  appearance: none;
   background-color: #fff;
 }
 
@@ -138,23 +138,20 @@ select {
 
 input:focus,
 select:focus {
-  border-color: #6366f1; /* indigo-500 */
+  border-color: #6366f1;
   box-shadow: 0 0 6px rgba(99, 102, 241, 0.4);
   outline: none;
 }
 
-/* Placeholder styles */
 ::placeholder {
-  color: #9ca3af; /* gray-400 */
+  color: #9ca3af;
 }
 
-/* Error text */
 .text-red-500 {
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
 
-/* Submit button */
 button {
   font-weight: 600;
   border-radius: 0.5rem;
@@ -162,7 +159,7 @@ button {
 }
 
 button:hover {
-  background-color: #4f46e5; /* darker indigo */
+  background-color: #4f46e5;
   transform: translateY(-1px);
 }
 

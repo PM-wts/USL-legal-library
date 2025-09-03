@@ -45,15 +45,13 @@ export default createStore({
       // Email
       if (!state.form.email) {
         errors.email = "Email is required.";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.form.email)) {
+      } else if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(state.form.email)) {
         errors.email = "Enter a valid email address.";
       }
 
       // Password
       if (!state.form.password) {
         errors.password = "Password is required.";
-      } else if (state.form.password.length < 6) {
-        errors.password = "Password must be at least 6 characters.";
       }
 
       // State
@@ -70,11 +68,15 @@ export default createStore({
       commit("SET_ERROR", null);
       commit("SET_RESPONSE", null);
 
+      // --- Client-side validation ---
       const errors = await dispatch("validate");
       if (Object.keys(errors).length > 0) {
         commit("SET_LOADING", false);
-        const combinedMsg = Object.values(errors).join("\n");
-        toast.error(combinedMsg, { timeout: 5000 });
+
+        // ❌ remove toast for client-side validation
+        // const firstError = Object.values(errors)[0];
+        // toast.error(firstError, { timeout: 5000 });
+
         return { success: false, errors };
       }
 
@@ -82,15 +84,20 @@ export default createStore({
         const res = await axios.post(config.apiUrl, state.form);
 
         if (res.data?.status === "Failed") {
+          let fieldErrors = {};
+
           if (res.data.errors) {
-            const combinedMsg = Object.values(res.data.errors).join("\n");
-            toast.error(combinedMsg, { timeout: 5000 });
+            fieldErrors = res.data.errors;
+
+            // ✅ Show toast only for server-side errors
+            const firstError = Object.values(fieldErrors)[0];
+            toast.error(firstError, { timeout: 5000 });
           } else {
             toast.error(res.data.message || "Something went wrong", { timeout: 5000 });
           }
 
           commit("SET_ERROR", res.data.message);
-          return { success: false, error: res.data };
+          return { success: false, errors: fieldErrors, error: res.data };
         }
 
         commit("SET_RESPONSE", res.data);
@@ -107,11 +114,15 @@ export default createStore({
       } catch (err) {
         const errorMsg = err.response?.data?.message || err.message || "Unexpected error";
         commit("SET_ERROR", errorMsg);
+
+        // ✅ keep toast for unexpected server/network errors
         toast.error(errorMsg, { timeout: 5000 });
+
         return { success: false, error: errorMsg };
       } finally {
         commit("SET_LOADING", false);
       }
     },
+
   },
 });
