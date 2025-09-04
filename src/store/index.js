@@ -9,6 +9,7 @@ export default createStore({
       username: "",
       email: "",
       password: "",
+      isEnrolled: "", // radio
       state: "",
     },
     response: null,
@@ -45,13 +46,22 @@ export default createStore({
       // Email
       if (!state.form.email) {
         errors.email = "Email is required.";
-      } else if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(state.form.email)) {
+      } else if (
+        !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(
+          state.form.email
+        )
+      ) {
         errors.email = "Enter a valid email address.";
       }
 
       // Password
       if (!state.form.password) {
         errors.password = "Password is required.";
+      }
+
+      // Is Enrolled
+      if (!state.form.isEnrolled) {
+        errors.isEnrolled = "Please select an option.";
       }
 
       // State
@@ -72,11 +82,6 @@ export default createStore({
       const errors = await dispatch("validate");
       if (Object.keys(errors).length > 0) {
         commit("SET_LOADING", false);
-
-        // ❌ remove toast for client-side validation
-        // const firstError = Object.values(errors)[0];
-        // toast.error(firstError, { timeout: 5000 });
-
         return { success: false, errors };
       }
 
@@ -88,41 +93,44 @@ export default createStore({
 
           if (res.data.errors) {
             fieldErrors = res.data.errors;
-
-            // ✅ Show toast only for server-side errors
             const firstError = Object.values(fieldErrors)[0];
             toast.error(firstError, { timeout: 5000 });
           } else {
-            toast.error(res.data.message || "Something went wrong", { timeout: 5000 });
+            toast.error(res.data.message || "Something went wrong", {
+              timeout: 5000,
+            });
           }
 
           commit("SET_ERROR", res.data.message);
+          commit("SET_LOADING", false); // reset only on failure
           return { success: false, errors: fieldErrors, error: res.data };
         }
 
         commit("SET_RESPONSE", res.data);
-        toast.success(res.data.message || "Form submitted successfully ✅", { timeout: 4000 });
+        toast.success(res.data.message || "Form submitted successfully ✅", {
+          timeout: 4000,
+        });
 
         if (res.data.href) {
+          // 🚀 keep loading = true until redirect
           setTimeout(() => {
             window.location.href = res.data.href;
-          }, 1500);
+          }, 500);
+        } else {
+          // ✅ only reset loading when there's no redirect
+          commit("SET_LOADING", false);
         }
 
         return { success: true, data: res.data };
-
       } catch (err) {
-        const errorMsg = err.response?.data?.message || err.message || "Unexpected error";
+        const errorMsg =
+          err.response?.data?.message || err.message || "Unexpected error";
         commit("SET_ERROR", errorMsg);
-
-        // ✅ keep toast for unexpected server/network errors
+        commit("SET_LOADING", false);
         toast.error(errorMsg, { timeout: 5000 });
 
         return { success: false, error: errorMsg };
-      } finally {
-        commit("SET_LOADING", false);
       }
     },
-
   },
 });

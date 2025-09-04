@@ -41,11 +41,58 @@
         <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
       </div>
 
+      <!-- Is Enrolled (Radio Buttons) -->
+      <div>
+        <label class="block text-gray-800 font-semibold mb-2">
+          Are you currently enrolled in one of our plans?
+        </label>
+        <div class="flex items-center space-x-6">
+          
+          <!-- Yes -->
+          <label class="inline-flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="enrolled"
+              value="Yes"
+              :checked="form.isEnrolled === 'Yes'"
+              @change="updateField('isEnrolled', 'Yes')"
+              class="hidden peer"
+            />
+            <span
+              class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center peer-checked:border-indigo-600 peer-checked:bg-indigo-600 transition"
+            >
+              <span class="w-2.5 h-2.5 bg-white rounded-full"></span>
+            </span>
+            <span class="ml-2 text-gray-700">Yes</span>
+          </label>
 
+          <!-- No -->
+          <label class="inline-flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="enrolled"
+              value="No"
+              :checked="form.isEnrolled === 'No'"
+              @change="updateField('isEnrolled', 'No')"
+              class="hidden peer"
+            />
+            <span
+              class="w-5 h-5 border-2 border-gray-400 rounded-full flex items-center justify-center peer-checked:border-indigo-600 peer-checked:bg-indigo-600 transition"
+            >
+              <span class="w-2.5 h-2.5 bg-white rounded-full"></span>
+            </span>
+            <span class="ml-2 text-gray-700">No</span>
+          </label>
+          
+        </div>
+        <p v-if="errors.isEnrolled" class="text-red-500 text-sm mt-1">{{ errors.isEnrolled }}</p>
+      </div>
 
       <!-- Select State -->
       <div>
-        <label class="block text-gray-800 font-semibold mb-2">State</label>
+        <label class="block text-gray-800 font-semibold mb-2">
+          The Legal Document Library forms are state specific. Please select the State that you need.
+        </label>
         <select
           v-model="form.state"
           class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 ease-in-out"
@@ -59,15 +106,24 @@
         <p v-if="errors.state" class="text-red-500 text-sm mt-1">{{ errors.state }}</p>
       </div>
 
-      <!-- Submit Button -->
-      <div>
-        <button
-          type="submit"
-          class="w-full bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 transition duration-200 ease-in-out"
-        >
-          Submit
-        </button>
-      </div>
+    <!-- Submit Button with Professional Loader -->
+    <div>
+      <button
+        type="submit"
+        :disabled="loading"
+        class="w-full flex items-center justify-center bg-indigo-600 text-white px-6 py-3 rounded-md 
+              hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 
+              transition duration-200 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        <!-- Modern Spinner -->
+        <div
+          v-if="loading"
+          class="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin mr-2"
+        ></div>
+        <span>{{ loading ? "Submitting..." : "Submit" }}</span>
+      </button>
+    </div>
+
     </form>
   </div>
 </template>
@@ -85,6 +141,7 @@ export default {
     const states = ref(statesJson)
 
     const form = computed(() => store.state.form)
+    const loading = computed(() => store.state.loading) // ✅ add loading
 
     const updateField = (field, value) => {
       store.commit("SET_FIELD", { field, value })
@@ -109,12 +166,18 @@ export default {
       states,
       updateField,
       handleSubmit,
+      loading, // ✅ expose to template
     }
   },
 }
 </script>
 
 <style scoped>
+/* Smooth professional loader */
+button div {
+  border-width: 3px;
+}
+
 /* Input and select fields with focus animation */
 input,
 select {
