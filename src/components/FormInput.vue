@@ -4,7 +4,9 @@
       
       <!-- Username -->
       <div>
-        <label class="block text-gray-800 font-semibold mb-2">Username</label>
+        <label class="block text-gray-800 font-semibold mb-2">
+          Username <span class="text-red-500">*</span>
+        </label>
         <input
           v-model="form.username"
           type="text"
@@ -17,7 +19,9 @@
 
       <!-- Password -->
       <div>
-        <label class="block text-gray-800 font-semibold mb-2">Password</label>
+        <label class="block text-gray-800 font-semibold mb-2">
+          Password <span class="text-red-500">*</span>
+        </label>
         <input
           v-model="form.password"
           type="password"
@@ -30,7 +34,9 @@
 
       <!-- Email -->
       <div>
-        <label class="block text-gray-800 font-semibold mb-2">Email</label>
+        <label class="block text-gray-800 font-semibold mb-2">
+          Email <span class="text-red-500">*</span>
+        </label>
         <input
           v-model="form.email"
           type="email"
@@ -44,10 +50,9 @@
       <!-- Is Enrolled (Radio Buttons) -->
       <div>
         <label class="block text-gray-800 font-semibold mb-2">
-          Are you currently enrolled in one of our plans?
+          Are you currently enrolled in one of our plans? <span class="text-red-500">*</span>
         </label>
         <div class="flex items-center space-x-6">
-          
           <!-- Yes -->
           <label class="inline-flex items-center cursor-pointer">
             <input
@@ -83,7 +88,6 @@
             </span>
             <span class="ml-2 text-gray-700">No</span>
           </label>
-          
         </div>
         <p v-if="errors.isEnrolled" class="text-red-500 text-sm mt-1">{{ errors.isEnrolled }}</p>
       </div>
@@ -92,6 +96,7 @@
       <div>
         <label class="block text-gray-800 font-semibold mb-2">
           The Legal Document Library forms are state specific. Please select the State that you need.
+          <span class="text-red-500">*</span>
         </label>
         <select
           v-model="form.state"
@@ -106,27 +111,28 @@
         <p v-if="errors.state" class="text-red-500 text-sm mt-1">{{ errors.state }}</p>
       </div>
 
-    <!-- Submit Button with Professional Loader -->
-    <div>
-      <button
-        type="submit"
-        :disabled="loading"
-        class="w-full flex items-center justify-center bg-indigo-600 text-white px-6 py-3 rounded-md 
-              hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 
-              transition duration-200 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        <!-- Modern Spinner -->
-        <div
-          v-if="loading"
-          class="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin mr-2"
-        ></div>
-        <span>{{ loading ? "Submitting..." : "Submit" }}</span>
-      </button>
-    </div>
+      <!-- Submit Button with Professional Loader -->
+      <div>
+        <button
+          type="submit"
+          :disabled="loading"
+          class="w-full flex items-center justify-center bg-indigo-600 text-white px-6 py-3 rounded-md 
+                hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 
+                transition duration-200 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <!-- Modern Spinner -->
+          <div
+            v-if="loading"
+            class="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin mr-2"
+          ></div>
+          <span>{{ loading ? "Submitting..." : "Submit" }}</span>
+        </button>
+      </div>
 
     </form>
   </div>
 </template>
+
 
 <script>
 import { useStore } from "vuex"
