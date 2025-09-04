@@ -1,7 +1,6 @@
 import { createStore } from "vuex";
 import axios from "axios";
 import config from "../config";
-import { useToast } from "vue-toastification";
 
 export default createStore({
   state: {
@@ -15,6 +14,13 @@ export default createStore({
     response: null,
     loading: false,
     error: null,
+
+    // 👇 modal state
+    modal: {
+      visible: false,
+      message: "",
+      type: "success", // success | error | warning | info
+    },
   },
 
   mutations: {
@@ -29,6 +35,18 @@ export default createStore({
     },
     SET_RESPONSE(state, payload) {
       state.response = payload;
+    },
+
+    // 👇 modal mutations
+    SHOW_MODAL(state, { message, type = "success" }) {
+      state.modal.visible = true;
+      state.modal.message = message;
+      state.modal.type = type;
+    },
+    HIDE_MODAL(state) {
+      state.modal.visible = false;
+      state.modal.message = "";
+      state.modal.type = "success";
     },
   },
 
@@ -73,7 +91,6 @@ export default createStore({
     },
 
     async submitForm({ commit, dispatch, state }) {
-      const toast = useToast();
       commit("SET_LOADING", true);
       commit("SET_ERROR", null);
       commit("SET_RESPONSE", null);
@@ -94,40 +111,53 @@ export default createStore({
           if (res.data.errors) {
             fieldErrors = res.data.errors;
             const firstError = Object.values(fieldErrors)[0];
-            toast.error(firstError, { timeout: 5000 });
+
+            // ✅ only modal
+            commit("SHOW_MODAL", { message: firstError, type: "error" });
           } else {
-            toast.error(res.data.message || "Something went wrong", {
-              timeout: 5000,
-            });
+            const msg = res.data.message || "Something went wrong";
+            commit("SHOW_MODAL", { message: msg, type: "error" });
           }
 
           commit("SET_ERROR", res.data.message);
-          commit("SET_LOADING", false); // reset only on failure
+          commit("SET_LOADING", false);
+
+          // auto-hide modal after 3s
+          setTimeout(() => commit("HIDE_MODAL"), 3000);
+
           return { success: false, errors: fieldErrors, error: res.data };
         }
 
         commit("SET_RESPONSE", res.data);
-        toast.success(res.data.message || "Form submitted successfully ✅", {
-          timeout: 4000,
-        });
+
+        // ✅ only modal
+        const successMsg =
+          res.data.message || "Form submitted successfully ✅";
+        commit("SHOW_MODAL", { message: successMsg, type: "success" });
 
         if (res.data.href) {
-          // 🚀 keep loading = true until redirect
+          // keep modal visible while redirecting
           setTimeout(() => {
             window.location.href = res.data.href;
           }, 500);
         } else {
-          // ✅ only reset loading when there's no redirect
+          // reset loading & auto-hide modal
           commit("SET_LOADING", false);
+          setTimeout(() => commit("HIDE_MODAL"), 3000);
         }
 
         return { success: true, data: res.data };
       } catch (err) {
         const errorMsg =
           err.response?.data?.message || err.message || "Unexpected error";
+
         commit("SET_ERROR", errorMsg);
         commit("SET_LOADING", false);
-        toast.error(errorMsg, { timeout: 5000 });
+
+        // ✅ only modal
+        commit("SHOW_MODAL", { message: errorMsg, type: "error" });
+
+        setTimeout(() => commit("HIDE_MODAL"), 3000);
 
         return { success: false, error: errorMsg };
       }
